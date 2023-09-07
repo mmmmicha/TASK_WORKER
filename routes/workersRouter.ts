@@ -1,5 +1,5 @@
 import express from 'express';
-import { postOff, postOn } from '../biz/timersBiz';
+import { postOff, postOn } from '../biz/workersBiz';
 import { CustomError, responseGen, ResultCode } from '../biz/util';
 import winston from 'winston';
 const router = express.Router();

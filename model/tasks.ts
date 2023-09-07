@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import dotenv from 'dotenv';
-import { convertDateToString } from '../../biz/util';
+import { convertDateToString } from '../biz/util';
 dotenv.config();
 
 export interface TasksInterface extends Document {
@@ -11,6 +11,7 @@ export interface TasksInterface extends Document {
     status: "pending" | "InProgress" | "Completed";
     dueDate: Date;
     isSended: boolean;
+    toURL: string;
 }
 
 var TasksSchema = new mongoose.Schema(
@@ -42,6 +43,9 @@ var TasksSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        toURL: {
+            type: String,
+        },
     },
     { timestamps: true }
 );
@@ -56,6 +60,7 @@ TasksSchema.set('toJSON', {
         delete ret.createdAt;
         delete ret.updatedAt;
         delete ret.isSended;
+        delete ret.toURL;
     },
 });
 

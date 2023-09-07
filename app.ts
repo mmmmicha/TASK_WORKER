@@ -8,7 +8,7 @@ import helmet from 'helmet';
 
 import winston from 'winston';
 import indexRouter from './routes/index';
-import timerRouter from './routes/timer';
+import timerRouter from './routes/workersRouter';
 import workerRouter from './routes/worker';
 import { responseGen } from './biz/util';
 
