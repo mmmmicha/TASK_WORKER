@@ -4,15 +4,14 @@ import { CustomError, responseGen, ResultCode } from "../biz/util";
 export const CheckAuth = async (req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/health-check")) return next();
 
-    if (req.headers.authorization) {
+    if (req.headers['api-key']) {
         try {
-            let authorizationKey = req.headers.authorization as string;
-            const apiKey = authorizationKey.replace("Bearer ", "");
+            const apiKey = req.headers['api-key'] as string;
 			if (apiKey !== process.env.API_KEY) throw new CustomError(401, ResultCode.PermissionDenied, "Invalid API Key");
             return next();
         } catch (err) {
-            if (err instanceof CustomError) return responseGen({ req, res, payload: err, resultCode: err.resultCode, httpCode: err.httpCode, msg: err.msg });
-            else return responseGen({ req, res, payload: err, httpCode: 500, msg: 'Unknown error' });
+            if (err instanceof CustomError) return responseGen({ res, payload: err, resultCode: err.resultCode, httpCode: err.httpCode, msg: err.msg });
+            else return responseGen({ res, payload: err, httpCode: 500, msg: 'Unknown error' });
         }
     }
 

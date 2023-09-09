@@ -1,9 +1,8 @@
 import express from 'express';
 const router = express.Router();
 
-/* aws healthCheck */
-router.get('/health-check', (req, res, next) => {
-    res.status(200).json('success');
+router.get('/health-check', async (req, res, next) => {
+	res.status(200).json({ msg: 'ok' });
 });
 
 export default router;

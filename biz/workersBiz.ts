@@ -1,28 +1,15 @@
 import cron from 'node-cron';
-import Timerinfo from '../model/timerinfo';
 import axios from 'axios';
 import winston from 'winston';
+import Tasks from '../model/tasks';
 
-// 매 3초마다 worker 를 실행합니다.
-let cronJob: cron.ScheduledTask | null = cron.schedule('* * * * * *', async () => {
-	// 여기에 worker 를 넣어주세요
-	const timerList = await Timerinfo.find();
-	let workingTimerListString = '';
-    timerList.forEach(timer => {
-        let axiosParams = {
-            url: timer.url,
-            method: timer.method,
-        };
-        if (timer.query) axiosParams['params'] = timer.query;
-        if (timer.data) axiosParams['data'] = timer.data;
-        if (timer.headers) axiosParams['headers'] = timer.headers;
-        axios(axiosParams).catch(err => {
-            console.error(`Error in ${timer.workerName} : ${err.message}`);
-        });
-        workingTimerListString += `${timer.workerName}, `;
-    });
-    console.info(`CronJob is running... This time is ${new Date().toLocaleString()}, job list : ${workingTimerListString}`);
-	winston.info(`CronJob is running... This time is ${new Date().toLocaleString()}, job list : ${workingTimerListString}`);
+// 매 1분마다 worker 를 실행합니다.
+let cronJob: cron.ScheduledTask | null = cron.schedule('*/1 * * * *', async () => {
+	
+    await tasksSender();
+
+    console.info(`CronJob is running... This time is ${new Date().toLocaleString()}`);
+	winston.info(`CronJob is running... This time is ${new Date().toLocaleString()}`);
 });
 
 export const postOn = async () => {
@@ -40,3 +27,27 @@ export const postOff = async () => {
 	console.info('CronJob stopped');
 	winston.info('CronJob stopped');
 };
+
+const tasksSender = async () => {
+    const tomorrow = new Date().getTime() + 86400000;
+    const tomorrowDate = new Date(tomorrow);
+    const tasksList = await Tasks.find({ isSended: false, dueDate: { $lte: tomorrowDate} });
+    console.log(tasksList);
+    tasksList.forEach(async task => {
+        let axiosParams = {
+            url: task.toURL,
+            method: 'POST',
+        };
+        axiosParams['data'] = {
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            dueDate: task.dueDate,  
+        };
+        axios(axiosParams).then(async res => {
+            await task.updateOne({ isSended: true });
+        }).catch(err => {
+            console.error(`Error in task[${task.id}] : ${err.message}`);
+        });
+    });
+}

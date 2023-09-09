@@ -50,7 +50,7 @@ var TasksSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const Tasks = mongoose.connection.useDb(process.env.MONGO_DB_DATABASE).model<TasksInterface>('Tasks', TasksSchema);
+const Tasks = mongoose.connection.useDb(process.env.MONGO_DB_DATABASE_RECONAPI).model<TasksInterface>('Tasks', TasksSchema);
 
 TasksSchema.set('toJSON', {
     transform: function (doc, ret, options) {
